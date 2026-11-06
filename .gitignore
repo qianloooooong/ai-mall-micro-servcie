@@ -4,6 +4,7 @@ target/
 **/target/
 **/test/
 application-dev.yml
+logs/
 
 ### STS ###
 .apt_generated

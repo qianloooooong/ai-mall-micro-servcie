@@ -5,6 +5,7 @@ target/
 **/test/
 application-dev.yml
 logs/
+aimall.jks
 
 ### STS ###
 .apt_generated

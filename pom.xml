@@ -17,7 +17,11 @@
 	</parent>
 
 	<modules>
+		<module>aimall-common</module>
+		<module>aimall-api</module>
 		<module>gateway-server</module>
+		<module>oauth-server</module>
+		<module>user-server</module>
 	</modules>
 
 	<properties>

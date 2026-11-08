@@ -1,0 +1,21 @@
+server:
+  port: 18090
+  servlet:
+    session:
+      tracking-modes: cookie
+
+spring:
+  application:
+    name: oauth-server
+  cloud:
+    nacos:
+      server-addr: 192.168.100.128:8848
+      discovery:
+        namespace: ai-mall
+      config:
+        namespace: ai-mall
+  config:
+    import:
+      - optional:nacos:oauth-jwt.yaml
+      - optional:nacos:shared-log.yaml
+      - optional:nacos:shared-redis.yaml

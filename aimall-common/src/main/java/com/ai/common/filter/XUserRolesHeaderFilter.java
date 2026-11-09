@@ -12,8 +12,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-import static com.ai.common.constants.XUserHeader.X_USER_ID;
-import static com.ai.common.constants.XUserHeader.X_USER_ROLES;
+import static com.ai.common.constants.XUserHeaderConstants.X_USER_ID;
+import static com.ai.common.constants.XUserHeaderConstants.X_USER_ROLES;
 
 public class XUserRolesHeaderFilter extends OncePerRequestFilter {
 

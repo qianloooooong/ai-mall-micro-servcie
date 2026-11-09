@@ -14,6 +14,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static com.ai.common.constants.XUserHeader.X_USER_ID;
+import static com.ai.common.constants.XUserHeader.X_USER_ROLES;
+
 @Configuration
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
@@ -30,11 +33,11 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
                     ServerHttpRequest request = exchange.getRequest().mutate()
                             .headers(h -> {           // 先剥离客户端伪造的身份头
-                                h.remove("X-User-Id");
-                                h.remove("X-User-Roles");
+                                h.remove(X_USER_ID);
+                                h.remove(X_USER_ROLES);
                             })
-                            .header("X-User-Id", userId == null ? "" : userId)
-                            .header("X-User-Roles", roles == null ? "" : String.join(",", roles))
+                            .header(X_USER_ID, userId == null ? "" : userId)
+                            .header(X_USER_ROLES, roles == null ? "" : String.join(",", roles))
                             .build();
                     return exchange.mutate().request(request).build();
                 })

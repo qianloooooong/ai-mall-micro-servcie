@@ -11,12 +11,15 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ai.common.constants.XUserHeader.X_USER_ID;
+import static com.ai.common.constants.XUserHeader.X_USER_ROLES;
+
 public class ContextInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String userId = request.getHeader("X-User-Id");
-        String roles = request.getHeader("X-User-Roles");
+        String userId = request.getHeader(X_USER_ID);
+        String roles = request.getHeader(X_USER_ROLES);
         if (StringUtils.hasText(userId)) {
             UserContext.setUser(userId, parseRoles(roles));
         }

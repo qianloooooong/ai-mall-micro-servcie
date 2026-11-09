@@ -12,17 +12,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-public class XUserRolesHeaderFilter extends OncePerRequestFilter {
+import static com.ai.common.constants.XUserHeader.X_USER_ID;
+import static com.ai.common.constants.XUserHeader.X_USER_ROLES;
 
-    private static final String ROLES_HEADER = "X-User-Roles";
-    private static final String USER_ID_HEADER = "X-User-Id";
+public class XUserRolesHeaderFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException
     {
-        String rolesHeader = request.getHeader(ROLES_HEADER);
+        String rolesHeader = request.getHeader(X_USER_ROLES);
 
         // 仅当存在角色头，且当前线程尚未被认证时，才进行填充，避免覆盖已有认证
         if (rolesHeader != null && !rolesHeader.isBlank()
@@ -33,7 +33,7 @@ public class XUserRolesHeaderFilter extends OncePerRequestFilter {
                     AuthorityUtils.commaSeparatedStringToAuthorityList(rolesHeader);
 
             // 构建一个“已认证”的 Authentication 对象
-            String userId = request.getHeader(USER_ID_HEADER);
+            String userId = request.getHeader(X_USER_ID);
             // Principal 可以暂用角色字符串或下游服务自己的用户标识（如 X-User-Id）
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(

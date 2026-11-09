@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Set;
 
+import static com.ai.common.constants.XUserHeader.X_USER_ID;
+import static com.ai.common.constants.XUserHeader.X_USER_ROLES;
+
 public class DefaultFeignConfig {
     @Bean
     public Logger.Level feignLogLevel(){
@@ -22,8 +25,8 @@ public class DefaultFeignConfig {
                 Long userId = UserContext.getUserId();
                 Set<String> roles = UserContext.getRoles();
                 if (userId != null && !roles.isEmpty()) {
-                    requestTemplate.header("X-User-Id", userId.toString());
-                    requestTemplate.header("X-User-Roles", String.join(",", roles));
+                    requestTemplate.header(X_USER_ID, userId.toString());
+                    requestTemplate.header(X_USER_ROLES, String.join(",", roles));
                 }
             }
         };

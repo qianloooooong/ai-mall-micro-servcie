@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,8 +54,13 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties({JwtProperties.class})
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final FrontendConfig frontend;
+
+    private static final String LOGIN_URL = "/login";
+    private static final String CALLBACK_URL = "/callback";
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B);
@@ -72,7 +78,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("http://localhost:5173/login"),
+                                new LoginUrlAuthenticationEntryPoint(frontend.getUrl() + LOGIN_URL),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                         )
                 );
@@ -87,7 +93,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // 禁用CSRF保护
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers(LOGIN_URL).permitAll()
                         // /error 放行，否则 404/500 会经 ERROR 转发又被入口点 302 回登录页，把真实错误掩盖掉
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
@@ -95,9 +101,9 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         // loginPage 是绝对 URL 时，loginProcessingUrl 会默认取 loginPage，
                         // 导致过滤器匹配不到 /login，必须显式指定处理地址
-                        .loginPage("http://localhost:5173/login")
-                        .loginProcessingUrl("/login")
-                        .failureUrl("http://localhost:5173/login?error"))
+                        .loginPage(frontend.getUrl() + LOGIN_URL)
+                        .loginProcessingUrl(LOGIN_URL)
+                        .failureUrl(frontend.getUrl() + "/login?error"))
                 .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();
     }
@@ -110,7 +116,7 @@ public class SecurityConfig {
                 .clientSecret(passwordEncoder().encode("spa-secret"))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:5173/callback")
+                .redirectUri(frontend.getUrl() + CALLBACK_URL)
                 .scope("openid").scope("profile").scope("read")
                 .clientSettings(ClientSettings.builder()
                         .requireProofKey(true)

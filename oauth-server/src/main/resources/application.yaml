@@ -19,3 +19,4 @@ spring:
       - optional:nacos:oauth-jwt.yaml
       - optional:nacos:shared-log.yaml
       - optional:nacos:shared-redis.yaml
+      - optional:nacos:frontend-url.yaml

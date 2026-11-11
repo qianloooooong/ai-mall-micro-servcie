@@ -2,7 +2,7 @@ package com.ai.common.exception;
 
 import com.ai.common.enums.StatusCode;
 
-public class CryptoKeyException extends BaseException {
+public class CryptoKeyException extends ErrorException {
     public CryptoKeyException(StatusCode sc) {
         super(sc);
     }

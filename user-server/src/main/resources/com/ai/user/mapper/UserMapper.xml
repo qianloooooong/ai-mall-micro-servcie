@@ -17,7 +17,7 @@
             <result property="deleted" column="deleted" />
             <result property="deleteTime" column="delete_time" />
     </resultMap>
-    <select id="getUserLoginInfo" resultType="com.ai.api.dto.UsernameLoginDTO">
+    <select id="getUserLoginInfo" resultType="com.ai.api.dto.UserLoginDTO">
         select u.id, u.username, uac.password_hash password from user u
         left join user_auth_credential uac on u.id = uac.user_id
         ${ew.customSqlSegment}

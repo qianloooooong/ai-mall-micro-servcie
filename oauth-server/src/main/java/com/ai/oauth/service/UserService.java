@@ -2,7 +2,7 @@ package com.ai.oauth.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.ai.api.client.UserClient;
-import com.ai.api.dto.UsernameLoginDTO;
+import com.ai.api.dto.UserLoginDTO;
 import com.ai.oauth.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,9 +21,9 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsernameLoginDTO usernameLoginDTO = new UsernameLoginDTO();
-        usernameLoginDTO.setUsername(username);
-        UsernameLoginDTO userLoginInfo = userClient.getUserLoginInfo(usernameLoginDTO).getData();
+        UserLoginDTO userLoginDTO = new UserLoginDTO();
+        userLoginDTO.setUsername(username);
+        UserLoginDTO userLoginInfo = userClient.getUserLoginInfo(userLoginDTO).getData();
 
         CustomUserDetails userDetails = new CustomUserDetails();
         userDetails.setUserId(userLoginInfo.getId() == null ? null : String.valueOf(userLoginInfo.getId()));

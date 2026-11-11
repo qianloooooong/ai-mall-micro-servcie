@@ -13,5 +13,10 @@
             <result property="deleted" column="deleted" />
             <result property="deleteTime" column="delete_time" />
     </resultMap>
+    <update id="deleteAuthEmail">
+        update user_auth_email
+        set deleted = id, delete_time = #{now}
+        where user_id = #{userId} and deleted = 0
+    </update>
 
 </mapper>

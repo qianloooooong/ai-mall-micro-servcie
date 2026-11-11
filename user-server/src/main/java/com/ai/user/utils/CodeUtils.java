@@ -6,8 +6,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.List;
+
+import static com.ai.common.constants.RedisConstants.CODE_LIMITER_TTL;
+import static com.ai.common.constants.RedisConstants.CODE_TTL;
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +38,11 @@ public class CodeUtils {
         return redisTemplate.execute(VERIFY_CODE_SCRIPT, List.of(key), code);
     }
 
-    public Long send(String key, String code) {
-        return redisTemplate.execute(SEND_CODE_SCRIPT, List.of(key), code, String.valueOf(Duration.ofMinutes(5).getSeconds()));
+    public Long send(String prefix, String limit, String key, String code) {
+        return redisTemplate.execute(
+                SEND_CODE_SCRIPT,
+                List.of(prefix, limit, key),
+                code, String.valueOf(CODE_TTL.getSeconds()), String.valueOf(CODE_LIMITER_TTL.getSeconds())
+                );
     }
 }

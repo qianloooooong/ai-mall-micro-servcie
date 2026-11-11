@@ -39,8 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.ai.common.constants.RedisConstants.EMAIL_CODE;
-import static com.ai.common.constants.RedisConstants.PHONE_CODE;
+import static com.ai.common.constants.RedisConstants.*;
 import static com.ai.common.enums.StatusCode.*;
 
 @Service
@@ -286,7 +285,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new UserException(INVALID_PHONE, "UserId=" + userId);
         }
 
-        Long send = codeUtils.send(PHONE_CODE + phone, generateCode());
+        Long send = codeUtils.send(PHONE_CODE, PHONE_CODE_LIMITER, phone, generateCode());
         if (send.equals(CodeUtils.FALSE)) {
             throw new UserException(PHONE_CODE_EXISTED, "UserId=" + userId);
         }
@@ -302,7 +301,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new UserException(INVALID_EMAIL, "UserId=" + userId);
         }
 
-        Long send = codeUtils.send(EMAIL_CODE + email, generateCode());
+        Long send = codeUtils.send(EMAIL_CODE, EMAIL_CODE_LIMITER, email, generateCode());
         if (send.equals(CodeUtils.FALSE)) {
             throw new UserException(EMAIL_CODE_EXISTED, "UserId=" + userId);
         }

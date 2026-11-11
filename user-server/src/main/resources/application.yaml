@@ -20,3 +20,4 @@ spring:
       - optional:nacos:shared-database.yaml
       - optional:nacos:shared-mp.yaml
       - optional:nacos:shared-log.yaml
+      - optional:nacos:shared-redis.yaml

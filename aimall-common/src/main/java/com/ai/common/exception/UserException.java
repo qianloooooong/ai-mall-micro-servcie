@@ -2,7 +2,7 @@ package com.ai.common.exception;
 
 import com.ai.common.enums.StatusCode;
 
-public class UserException extends BaseException {
+public class UserException extends WarmException {
     public UserException(StatusCode sc) {
         super(sc);
     }

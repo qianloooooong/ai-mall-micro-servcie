@@ -2,7 +2,7 @@ package com.ai.common.exception;
 
 import com.ai.common.enums.StatusCode;
 
-public class BlindIndexException extends BaseException {
+public class BlindIndexException extends ErrorException {
     public BlindIndexException(StatusCode sc) {
         super(sc);
     }

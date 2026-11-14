@@ -6,6 +6,7 @@ target/
 application-dev.yml
 logs/
 aimall.jks
+test-login-vue/
 
 ### STS ###
 .apt_generated

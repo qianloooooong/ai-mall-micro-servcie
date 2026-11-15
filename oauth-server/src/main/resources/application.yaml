@@ -3,6 +3,11 @@ server:
   servlet:
     session:
       tracking-modes: cookie
+      timeout: 12h
+      cookie:
+        http-only: true
+        same-site: lax
+        max-age: 12h
 
 spring:
   application:

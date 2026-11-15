@@ -9,7 +9,7 @@ if redis.call('exists', limitPrefix .. key) == 1 then
     return 0
 end
 redis.call('setex', prefix .. key, codeExpire, code)
-redis.call('setex', limitPrefix .. key, limiterExpire, nil)
+redis.call('setex', limitPrefix .. key, limiterExpire, '')
 return 1
 
 

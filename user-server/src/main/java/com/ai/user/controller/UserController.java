@@ -33,48 +33,44 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping("/phone/bind")
+    @PostMapping("/bind/phone")
     public Result<String> bindPhone(@RequestBody UserBindPhoneDTO userBindPhoneDTO) {
         String maskedPhone = userService.bindPhone(userBindPhoneDTO);
         return Result.success(StatusCode.SUCCESS_BIND_PHONE, maskedPhone);
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping("/email/bind")
+    @PostMapping("/bind/email")
     public Result<String> bindEmail(@RequestBody UserBindEmailDTO userBindEmailDTO) {
         String maskedEmail = userService.bindEmail(userBindEmailDTO);
         return Result.success(StatusCode.SUCCESS_BIND_EMAIL, maskedEmail);
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping("/phone/reset")
+    @PostMapping("/reset/phone")
     public Result<String> resetPhone(@RequestBody UserBindPhoneDTO userBindPhoneDTO) {
         String maskedPhone = userService.resetPhone(userBindPhoneDTO);
         return Result.success(StatusCode.SUCCESS_RESET_PHONE, maskedPhone);
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping("/email/reset")
+    @PostMapping("/reset/email")
     public Result<String> resetEmail(@RequestBody UserBindEmailDTO userBindEmailDTO) {
         String maskedEmail = userService.resetEmail(userBindEmailDTO);
         return Result.success(StatusCode.SUCCESS_RESET_EMAIL, maskedEmail);
     }
 
-    @PostMapping("/phone/code")
+    @PostMapping("/code/phone")
     public Result<Void> sendPhoneCode(@RequestParam String phone) {
         userService.sendPhoneCode(phone);
         return Result.success(StatusCode.SUCCESS_SEND_PHONE_CODE);
     }
 
-    @PostMapping("/email/code")
+    @PostMapping("/code/email")
     public Result<Void> sendEmailCode(@RequestParam String email) {
         userService.sendEmailCode(email);
         return Result.success(StatusCode.SUCCESS_SEND_EMAIL_CODE);
     }
-
-
-
-
 
     // Test Implementation TODO delete
     @GetMapping("/hi")

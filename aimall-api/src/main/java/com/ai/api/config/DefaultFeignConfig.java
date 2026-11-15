@@ -1,5 +1,6 @@
 package com.ai.api.config;
 
+import com.ai.api.client.fallback.UserClientFallbackFactory;
 import com.ai.common.utils.UserContext;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -30,5 +31,10 @@ public class DefaultFeignConfig {
                 }
             }
         };
+    }
+
+    @Bean
+    public UserClientFallbackFactory userClientFallbackFactory() {
+        return new UserClientFallbackFactory();
     }
 }

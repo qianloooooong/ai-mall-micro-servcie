@@ -11,7 +11,11 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    UserLoginDTO getUserLoginInfo(@Param(Constants.WRAPPER) QueryWrapper<User> ew);
+    UserLoginDTO getUserLoginInfoByUsername(@Param(Constants.WRAPPER) QueryWrapper<User> ew);
+
+    UserLoginDTO getUserLoginInfoByMobile(@Param(Constants.WRAPPER) QueryWrapper<User> ew);
+
+    UserLoginDTO getUserLoginInfoByEmail(@Param(Constants.WRAPPER) QueryWrapper<User> ew);
 }
 
 

@@ -10,6 +10,8 @@ public interface UserService extends IService<User> {
 
     UserLoginDTO getUserLoginInfo(UserLoginDTO userLoginDTO);
 
+    UserLoginDTO loginByCode(UserLoginDTO userLoginDTO);
+
     String bindPhone(UserBindPhoneDTO userBindPhoneDTO);
 
     String bindEmail(UserBindEmailDTO userBindEmailDTO);

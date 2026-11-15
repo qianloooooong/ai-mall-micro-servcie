@@ -10,4 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface UserClient {
     @PostMapping("/users/login/info")
     Result<UserLoginDTO> getUserLoginInfo(@RequestBody UserLoginDTO userLoginDTO);
+
+    @PostMapping("/users/login/code")
+    Result<UserLoginDTO> loginByCode(@RequestBody UserLoginDTO userLoginDTO);
 }

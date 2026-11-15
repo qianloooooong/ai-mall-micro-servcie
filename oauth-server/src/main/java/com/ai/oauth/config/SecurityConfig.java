@@ -1,6 +1,9 @@
 package com.ai.oauth.config;
 
+import com.ai.api.client.UserClient;
 import com.ai.oauth.domain.CustomUserDetails;
+import com.ai.oauth.domain.LoginTypeWebAuthenticationDetails;
+import com.ai.oauth.providers.VerificationCodeAuthenticationProvider;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -13,12 +16,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -61,6 +68,9 @@ public class SecurityConfig {
 
     private static final String LOGIN_URL = "/login";
     private static final String CALLBACK_URL = "/callback";
+
+    private final UserClient userClient;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B);
@@ -88,9 +98,10 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // 禁用CSRF保护
+                .authenticationManager(authenticationManager)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(LOGIN_URL).permitAll()
@@ -103,9 +114,18 @@ public class SecurityConfig {
                         // 导致过滤器匹配不到 /login，必须显式指定处理地址
                         .loginPage(frontend.getUrl() + LOGIN_URL)
                         .loginProcessingUrl(LOGIN_URL)
-                        .failureUrl(frontend.getUrl() + "/login?error"))
+                        .failureUrl(frontend.getUrl() + "/login?error")
+                        .authenticationDetailsSource(LoginTypeWebAuthenticationDetails::new)
+                )
                 .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider(userDetailsService);
+        daoProvider.setPasswordEncoder(passwordEncoder());
+        return new ProviderManager(daoProvider, new VerificationCodeAuthenticationProvider(userClient));
     }
 
     @Bean
@@ -166,34 +186,10 @@ public class SecurityConfig {
         }
     }
 
-/*    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            // 1. 从数据库查询用户实体（伪代码）
-            // UserEntity entity = userRepository.findByUsername(username);
-            // if (entity == null) throw new UsernameNotFoundException(...);
-
-            // 2. 组装 CustomUserDetails
-            CustomUserDetails user = new CustomUserDetails();
-            user.setUserId("1001");                          // entity.getId()
-            user.setUsername("user");                        // entity.getUsername()
-            user.setPassword(passwordEncoder().encode("123456"));             // entity.getPassword()
-            user.setAuthorities(Set.of(
-                    new SimpleGrantedAuthority("ROLE_USER")
-            ));
-            return user;
-        };
-    }*/
-
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
-
-//    @Bean
-//    public AuthorizationServerSettings authorizationServerSettings() {
-//        return AuthorizationServerSettings.builder().build();
-//    }
 
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
@@ -215,18 +211,11 @@ public class SecurityConfig {
 
                 Set<String> roles = principal.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-//                        .filter(a -> a.startsWith("ROLE_"))
-//                        .map(a -> a.substring("ROLE_".length()))
                         .collect(Collectors.toSet());
 
                 if (!roles.isEmpty()) {
                     claims.put("roles", roles);
                 }
-
-//                log.info("JWT customizer: grant={}, principalType={}, claims userid={}, roles={}",
-//                        context.getAuthorizationGrantType().getValue(),
-//                        user == null ? "null" : user.getClass().getName(),
-//                        claims.get("userid"), claims.get("roles"));
             });
         };
     }
@@ -248,24 +237,4 @@ public class SecurityConfig {
     public AuthorizationServerSettings authorizationServerSettings(JwtProperties properties) {
         return AuthorizationServerSettings.builder().issuer(properties.getIssuer()).build();
     }
-
-//    @Bean
-//    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-//        JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
-//        // 默认已处理 scope -> SCOPE_xxx
-//
-//        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-//        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-//            var authorities = new java.util.ArrayList<>(scopeConverter.convert(jwt));
-//            // 读取自定义 roles Claim，还原为 ROLE_ 前缀
-//            java.util.List<String> roles = jwt.getClaimAsStringList("roles");
-//            if (roles != null) {
-//                roles.forEach(r -> authorities.add(
-//                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + r)));
-//            }
-//            return authorities;
-//        });
-//        converter.setPrincipalClaimName("userid"); // 让 Authentication.getName() 返回 userid
-//        return converter;
-//    }
 }

@@ -17,9 +17,23 @@
             <result property="deleted" column="deleted" />
             <result property="deleteTime" column="delete_time" />
     </resultMap>
-    <select id="getUserLoginInfo" resultType="com.ai.api.dto.UserLoginDTO">
+    <select id="getUserLoginInfoByUsername" resultType="com.ai.api.dto.UserLoginDTO">
         select u.id, u.username, uac.password_hash password from user u
         left join user_auth_credential uac on u.id = uac.user_id
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="getUserLoginInfoByEmail" resultType="com.ai.api.dto.UserLoginDTO">
+        select u.id, u.username, uac.password_hash password from user u
+        left join user_auth_credential uac on u.id = uac.user_id
+        left join user_auth_email uae on u.id = uae.user_id
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="getUserLoginInfoByMobile" resultType="com.ai.api.dto.UserLoginDTO">
+        select u.id, u.username, uac.password_hash password from user u
+        left join user_auth_credential uac on u.id = uac.user_id
+        left join user_auth_mobile uam on u.id = uam.user_id
         ${ew.customSqlSegment}
     </select>
 </mapper>

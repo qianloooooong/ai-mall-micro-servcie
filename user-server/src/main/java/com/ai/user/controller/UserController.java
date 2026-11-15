@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
-import static com.ai.common.enums.StatusCode.SUCCESS_WITH_DATA;
-
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -27,6 +25,11 @@ public class UserController {
     @PostMapping("/login/info")
     public Result<UserLoginDTO> getUserLoginInfo(@RequestBody UserLoginDTO userLoginDTO) {
         return Result.success(StatusCode.SUCCESS_GET_USER_LOGIN_INFO, userService.getUserLoginInfo(userLoginDTO));
+    }
+
+    @PostMapping("/login/code")
+    Result<UserLoginDTO> loginByCode(@RequestBody UserLoginDTO userLoginDTO){
+        return Result.success(StatusCode.SUCCESS_USER_LOGIN_BY_CODE, userService.loginByCode(userLoginDTO));
     }
 
     @PreAuthorize("hasAuthority('USER')")
@@ -71,19 +74,22 @@ public class UserController {
 
 
 
+
+
+    // Test Implementation TODO delete
     @GetMapping("/hi")
     public Result<String> hi() {
         Long userId = UserContext.getUserId();
         Set<String> roles = UserContext.getRoles();
         log.info("User ID: {}", userId);
         log.info("User Roles: {}", roles);
-        return Result.success(SUCCESS_WITH_DATA, userId + " " + roles);
+        return Result.success(StatusCode.SUCCESS_WITH_DATA, userId + " " + roles);
         //return Result.error(50001, "error");
     }
 
     @GetMapping("/auth")
     @PreAuthorize("hasAuthority('ADMIN')")
     public Result<String> testAuth() {
-        return Result.success(SUCCESS_WITH_DATA, "auth success");
+        return Result.success(StatusCode.SUCCESS_WITH_DATA, "auth success");
     }
 }

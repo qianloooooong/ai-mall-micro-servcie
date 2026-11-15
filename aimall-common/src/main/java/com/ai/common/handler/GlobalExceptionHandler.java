@@ -7,11 +7,11 @@ import com.ai.common.results.Result;
 import com.ai.common.utils.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static com.ai.common.enums.StatusCode.ACCESS_DENIED;
-import static com.ai.common.enums.StatusCode.FAILURE;
+import static com.ai.common.enums.StatusCode.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -40,5 +40,11 @@ public class GlobalExceptionHandler{
     public Result<String> handleException(AuthorizationDeniedException e){
         log.warn("捕获AuthorizationDeniedException异常: UserId={}, Roles={}", UserContext.getUserId(), UserContext.getRoles());
         return Result.error(ACCESS_DENIED);
+    }
+
+    @ExceptionHandler
+    public Result<String> handleException(UsernameNotFoundException e){
+        log.error("捕获UsernameNotFoundException异常, desc={}", e.getMessage());
+        return Result.error(USERNAME_NOT_FOUND);
     }
 }

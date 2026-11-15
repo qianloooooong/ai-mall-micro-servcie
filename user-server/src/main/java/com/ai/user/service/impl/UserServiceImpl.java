@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ai.api.dto.UserLoginDTO;
 import com.ai.common.enums.LogicDeleted;
+import com.ai.common.enums.LoginType;
 import com.ai.common.enums.UserStatus;
 import com.ai.common.exception.UserException;
 import com.ai.common.utils.UserContext;
@@ -77,12 +78,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq("u.username", username);
-        wrapper.eq("u.status", UserStatus.ENABLE.getCode());
-        wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getCode());
-        wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getCode());
+        UserLoginDTO loginInfo = null;
+        String loginType = userLoginDTO.getLoginType();
 
-        UserLoginDTO loginInfo = userMapper.getUserLoginInfo(wrapper);
+        if (LoginType.USERNAME_PASSWORD.getType().equals(loginType)) {
+            wrapper.eq("u.username", username);
+            wrapper.eq("u.status", UserStatus.ENABLE.getCode());
+            wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getCode());
+            wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getCode());
+
+            loginInfo = userMapper.getUserLoginInfoByUsername(wrapper);
+        } else if (LoginType.MOBILE_PASSWORD.getType().equals(loginType)) {
+            wrapper.eq("uam.mobile_hash", hmacBlindIndex.compute(userLoginDTO.getUsername(), keyProvider.getHmacKey(keyProvider.hmacCurrentVersion())));
+            wrapper.eq("u.status", UserStatus.ENABLE.getCode());
+            wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getCode());
+            wrapper.eq("uam.deleted", LogicDeleted.NOT_DELETED.getCode());
+            wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getCode());
+
+            loginInfo = userMapper.getUserLoginInfoByMobile(wrapper);
+        } else if (LoginType.EMAIL_PASSWORD.getType().equals(loginType)) {
+            wrapper.eq("uae.email_hash", hmacBlindIndex.compute(userLoginDTO.getUsername(), keyProvider.getHmacKey(keyProvider.hmacCurrentVersion())));
+            wrapper.eq("u.status", UserStatus.ENABLE.getCode());
+            wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getCode());
+            wrapper.eq("uae.deleted", LogicDeleted.NOT_DELETED.getCode());
+            wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getCode());
+
+            loginInfo = userMapper.getUserLoginInfoByEmail(wrapper);
+        }
+
 
         if (loginInfo == null) {
             throw new UserException(UNAUTHORIZED_LOGIN_INFO_ERROR);
@@ -91,6 +114,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         List<String> list = userRoleMapper.getRoles(loginInfo.getId());
         Set<String> roles = new HashSet<>(list);
         loginInfo.setRoles(roles);
+
+        return loginInfo;
+    }
+
+    @Override
+    public UserLoginDTO loginByCode(UserLoginDTO userLoginDTO) {
+        String loginType = userLoginDTO.getLoginType();
+        if (!LoginType.isCodeLogin(loginType)) {
+            throw new UserException(UNAUTHORIZED_LOGIN_INFO_ERROR);
+        }
+
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq("u.status", UserStatus.ENABLE.getCode());
+        wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getCode());
+        wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getCode());
+        UserLoginDTO loginInfo = null;
+
+        if (LoginType.MOBILE_CODE.getType().equals(loginType)) {
+            String phone = userLoginDTO.getUsername();
+            String code = userLoginDTO.getPassword();
+            if (Validators.isCnMobile(phone)) {
+                checkPhoneCode(phone, code, null);
+            } else {
+                throw new UserException(INVALID_PHONE);
+            }
+
+            wrapper.eq("uam.mobile_hash", hmacBlindIndex.compute(phone, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion())));
+            wrapper.eq("uam.deleted", LogicDeleted.NOT_DELETED.getCode());
+            loginInfo = userMapper.getUserLoginInfoByMobile(wrapper);
+        } else if (LoginType.EMAIL_CODE.getType().equals(loginType)) {
+            String email = userLoginDTO.getUsername();
+            String code = userLoginDTO.getPassword();
+            if (Validators.isEmail(email)) {
+                checkEmailCode(email, code, null);
+            } else {
+                throw new UserException(INVALID_EMAIL);
+            }
+
+            wrapper.eq("uae.email_hash", hmacBlindIndex.compute(email, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion())));
+            wrapper.eq("uae.deleted", LogicDeleted.NOT_DELETED.getCode());
+            loginInfo = userMapper.getUserLoginInfoByEmail(wrapper);
+        }
+
+        if (loginInfo == null) {
+            throw new UserException(UNAUTHORIZED_LOGIN_INFO_ERROR);
+        }
+
+        loginInfo.setRoles(new HashSet<>(userRoleMapper.getRoles(loginInfo.getId())));
 
         return loginInfo;
     }

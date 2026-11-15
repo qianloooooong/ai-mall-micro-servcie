@@ -11,6 +11,7 @@ public enum StatusCode {
     SUCCESS_TOKEN_REFRESH(200008,"success", "刷新令牌成功"),
     SUCCESS_LOGOUT(200009,"登出成功", "登出成功"),
     SUCCESS_GET_USER_LOGIN_INFO(200010,"success", "成功获取用户登录信息"),
+    SUCCESS_USER_LOGIN_BY_CODE(200011,"success", "成功通过验证码登录"),
 
     CREATED(201000,"success", "创建成功"),
     SUCCESS_POST_WITH_DATA(201001,"success", "POST请求成功并返回数据"),
@@ -30,6 +31,7 @@ public enum StatusCode {
     UNAUTHORIZED_REFRESH_TOKEN_INVALID(401003,"身份认证失败", "refresh token无效"),
     UNAUTHORIZED_REFRESH_TOKEN_EXPIRED(401004,"身份认证失败", "refresh token已过期"),
     UNAUTHORIZED_LOGIN_INFO_ERROR(401005,"账号或密码错误", "用户名错误"),
+    USERNAME_NOT_FOUND(401006,"用户不存在或凭据无效", "用户不存在或凭据无效"),
 
     FORBIDDEN(403000,"没有访问权限", "禁止访问"),
     ACCESS_DENIED(403001,"没有访问权限", "用户无访问权限"),

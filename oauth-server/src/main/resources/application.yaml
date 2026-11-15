@@ -1,13 +1,5 @@
 server:
   port: 18090
-  servlet:
-    session:
-      tracking-modes: cookie
-      timeout: 12h
-      cookie:
-        http-only: true
-        same-site: lax
-        max-age: 12h
 
 spring:
   application:
@@ -25,3 +17,4 @@ spring:
       - optional:nacos:shared-log.yaml
       - optional:nacos:shared-redis.yaml
       - optional:nacos:frontend-url.yaml
+      - optional:nacos:oauth-redis-session.yaml

@@ -1,6 +1,5 @@
 package com.ai.api.dto;
 
-import com.ai.common.enums.LoginType;
 import lombok.Data;
 
 import java.util.Set;
@@ -10,6 +9,6 @@ public class UserLoginDTO {
     private Long id;
     private String username;
     private String password;
-    private LoginType loginType;
+    private String loginType;
     private Set<String> roles;
 }

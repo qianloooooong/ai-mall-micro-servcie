@@ -3,6 +3,8 @@ package com.ai.user.service;
 import com.ai.api.dto.UserLoginDTO;
 import com.ai.user.pojo.dto.UserBindEmailDTO;
 import com.ai.user.pojo.dto.UserBindPhoneDTO;
+import com.ai.user.pojo.dto.UserRegisterDTO;
+import com.ai.user.pojo.dto.UserResetPasswordDTO;
 import com.ai.user.pojo.entity.User;
 import com.baomidou.mybatisplus.spring.service.IService;
 
@@ -23,4 +25,8 @@ public interface UserService extends IService<User> {
     void sendPhoneCode(String phone);
 
     void sendEmailCode(String email);
+
+    void register(UserRegisterDTO userRegisterDTO);
+
+    void resetPassword(UserResetPasswordDTO userResetPasswordDTO);
 }

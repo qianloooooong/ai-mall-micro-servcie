@@ -3,6 +3,7 @@ package com.ai.user.pojo.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 @TableName(value ="user_role")
 @Data
+@Builder
 public class UserRole {
     /**
      * 主键ID

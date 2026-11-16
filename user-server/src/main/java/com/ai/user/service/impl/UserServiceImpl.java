@@ -1,5 +1,6 @@
 package com.ai.user.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ai.api.dto.UserLoginDTO;
 import com.ai.common.enums.*;
@@ -460,6 +461,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //return RandomUtil.randomNumbers(6);
     }
 
+    /**
+     * 注册：phone 与 email 二选一，业务上不会同时提供。
+     * - 有 username：必须提供 phone 或 email 之一，且必须设置 password
+     * - 无 username：必须提供 phone 或 email 之一，不设置 password
+     */
     @Override
     @Transactional
     public void register(UserRegisterDTO userRegisterDTO) {
@@ -593,7 +599,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private User insertUser(String username, long userno, LocalDateTime now) {
         User user = User.builder()
                 .userNo(userno)
-                .nickName(username)
+                .username(username)
+                .nickName("nick-" + RandomUtil.randomNumbers(10))
                 .avatar(null)
                 .gender(GenderEnum.NON_SETTING.getValue())
                 .createTime(now)

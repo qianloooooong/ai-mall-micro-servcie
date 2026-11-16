@@ -1,8 +1,10 @@
 package com.ai.common.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum StatusCode {
     SUCCESS(200000,"success", "成功"),
     SUCCESS_WITH_DATA(200001,"success", "请求成功并返回数据"),
@@ -22,6 +24,8 @@ public enum StatusCode {
     SUCCESS_RESET_EMAIL(201006,"成功重置邮箱", "成功重置邮箱"),
     SUCCESS_SEND_PHONE_CODE(201007,"手机验证码已发送", "成功发送手机验证码"),
     SUCCESS_SEND_EMAIL_CODE(201008,"邮箱验证码已发送", "成功发送邮箱验证码"),
+    SUCCESS_REGISTER(201009,"账号注册成功", "账号注册成功"),
+    SUCCESS_RESET_PASSWORD(201010,"密码重置成功", "密码重置成功"),
 
     BAD_REQUEST(400000,"参数错误", "参数错误"),
 
@@ -50,6 +54,12 @@ public enum StatusCode {
     NULL_PHONE(422011,"手机号码不能为空", "用户手机参数为空"),
     INVALID_EMAIL(422012,"无效的邮箱地址", "用户邮箱参数无效"),
     NULL_EMAIL(422013,"邮箱地址不能为空", "用户邮箱参数为空"),
+    INVALID_REGISTER_INFO(422014,"无效的注册信息", "注册信息无效"),
+    INVALID_USERNAME(422015,"用户名只允许包含字母、数字、下划线和点，长度8到20个字符", "用户名无效"),
+    NULL_PASSWORD(422016,"密码不能为空", "密码参数为空"),
+    INVALID_PASSWORD(422017,"", "密码不能包含中文和中文字符，长度8到72字符"),
+    CONFIRM_PASSWORD_NOT_MATCH(422018,"两次输入的密码不一致", "密码不一致"),
+    INVALID_RESET_PASSWORD_INFO(422019,"无效的密码重置信息", "密码重置信息无效"),
 
     PHONE_CODE_EXISTED(429001,"操作频繁，请稍候再试", "手机验证码已存在"),
     EMAIL_CODE_EXISTED(429002,"操作频繁，请稍候再试", "邮箱验证码已存在"),
@@ -67,15 +77,17 @@ public enum StatusCode {
     PHONE_EXISTED(500019,"手机号码已存在", "手机号码已存在"),
     BIND_EMAIL_FAILURE(500020,"绑定邮箱失败", "绑定邮箱失败"),
     BIND_EMAIL_NOT_FIRST(500021,"绑定邮箱失败", "非首次绑定邮箱"),
-    EMAIL_EXISTED(500022,"邮箱地址已存在", "邮箱地址已存在");
+    EMAIL_EXISTED(500022,"邮箱地址已存在", "邮箱地址已存在"),
+    ID_WORKER_ERROR(500023,"服务器内部错误", "ID生成器错误"),
+    INSERT_USER_FAILURE(500024,"服务器内部错误", "用户插入失败"),
+    INSERT_USER_CREDENTIAL_FAILURE(500025,"服务器内部错误", "用户凭证插入失败"),
+    INSERT_USER_ROLE_FAILURE(500026,"服务器内部错误", "用户角色插入失败"),
+    INSERT_USER_EMAIL_FAILURE(500027,"服务器内部错误", "用户邮箱插入失败"),
+    INSERT_USER_PHONE_FAILURE(500028,"服务器内部错误", "用户手机插入失败"),
+    USERNAME_EXISTED(500029,"用户名已存在", "用户名已存在"),
+    RESET_PASSWORD_FAILURE(500030,"密码重置失败", "密码重置失败");
 
     private final int code;
     private final String msg;
     private final String description;
-
-    StatusCode(int code, String msg, String description) {
-        this.code = code;
-        this.msg = msg;
-        this.description = description;
-    }
 }

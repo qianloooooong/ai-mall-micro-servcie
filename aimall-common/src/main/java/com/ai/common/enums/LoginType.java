@@ -1,8 +1,10 @@
 package com.ai.common.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum LoginType {
     USERNAME_PASSWORD("up", "用户名、密码登录"),
     EMAIL_PASSWORD("ep", "邮箱、密码登录"),
@@ -12,11 +14,6 @@ public enum LoginType {
 
     private final String type;
     private final String description;
-
-    LoginType(String type, String description) {
-        this.type = type;
-        this.description = description;
-    }
 
     public static boolean isCodeLogin(String type) {
         return EMAIL_CODE.getType().equals(type) || MOBILE_CODE.getType().equals(type) ;

@@ -14,6 +14,7 @@ public enum StatusCode {
     SUCCESS_LOGOUT(200009,"登出成功", "登出成功"),
     SUCCESS_GET_USER_LOGIN_INFO(200010,"success", "成功获取用户登录信息"),
     SUCCESS_USER_LOGIN_BY_CODE(200011,"success", "成功通过验证码登录"),
+    USERNAME_NOT_USED(200012,"success", "可用的用户名"),
 
     CREATED(201000,"success", "创建成功"),
     SUCCESS_POST_WITH_DATA(201001,"success", "POST请求成功并返回数据"),
@@ -26,6 +27,7 @@ public enum StatusCode {
     SUCCESS_SEND_EMAIL_CODE(201008,"邮箱验证码已发送", "成功发送邮箱验证码"),
     SUCCESS_REGISTER(201009,"账号注册成功", "账号注册成功"),
     SUCCESS_RESET_PASSWORD(201010,"密码重置成功", "密码重置成功"),
+    SUCCESS_RESET_NICKNAME(201011,"昵称重置成功", "昵称重置成功"),
 
     BAD_REQUEST(400000,"参数错误", "参数错误"),
 
@@ -60,6 +62,8 @@ public enum StatusCode {
     INVALID_PASSWORD(422017,"", "密码不能包含中文和中文字符，长度8到72字符"),
     CONFIRM_PASSWORD_NOT_MATCH(422018,"两次输入的密码不一致", "密码不一致"),
     INVALID_RESET_PASSWORD_INFO(422019,"无效的密码重置信息", "密码重置信息无效"),
+    TO_LONG_NICKNAME(422020,"昵称长度不能超过32个字符", "昵称过长"),
+    NULL_NICKNAME(422021,"昵称不能为空", "昵称参数为空"),
 
     PHONE_CODE_EXISTED(429001,"操作频繁，请稍候再试", "手机验证码已存在"),
     EMAIL_CODE_EXISTED(429002,"操作频繁，请稍候再试", "邮箱验证码已存在"),

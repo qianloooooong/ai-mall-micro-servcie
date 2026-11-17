@@ -35,7 +35,14 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/auth/**", "/oauth2/**", "/login", "/users/code/**").permitAll()
+                        .pathMatchers(
+                                "/auth/**",
+                                "/oauth2/**",
+                                "/login",
+                                "/users/code/**",
+                                "/users/register",
+                                "/users/register/username"
+                        ).permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
@@ -69,7 +76,6 @@ public class SecurityConfig {
             }
             return Flux.fromIterable(authorities);
         });
-        converter.setPrincipalClaimName("userid"); // 让 Authentication.getName() 返回 userid
         return converter;
     }
 }

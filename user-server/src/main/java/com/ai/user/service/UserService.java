@@ -26,7 +26,11 @@ public interface UserService extends IService<User> {
 
     void sendEmailCode(String email);
 
-    void register(UserRegisterDTO userRegisterDTO);
+    User register(UserRegisterDTO userRegisterDTO);
 
     void resetPassword(UserResetPasswordDTO userResetPasswordDTO);
+
+    void resetNickname(String nickname);
+
+    void checkUsername(String username);
 }

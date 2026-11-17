@@ -28,9 +28,10 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername(username);
-        userLoginDTO.setLoginType(resolveLoginType());
+        UserLoginDTO userLoginDTO = UserLoginDTO.builder()
+                .username(username)
+                .loginType(resolveLoginType())
+                .build();
 
         UserLoginDTO userLoginInfo = null;
         try {

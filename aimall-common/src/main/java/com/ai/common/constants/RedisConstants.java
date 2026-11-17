@@ -12,4 +12,8 @@ public interface RedisConstants {
 
     String ID_INCR = "id:incr:";
     Duration ID_INCR_TTL = Duration.ofDays(30);
+
+    String USERNAME_BLOOM_FILTER = "am:username";
+    String MOBILE_BLOOM_FILTER = "am:mobile";
+    String EMAIL_BLOOM_FILTER = "am:email";
 }

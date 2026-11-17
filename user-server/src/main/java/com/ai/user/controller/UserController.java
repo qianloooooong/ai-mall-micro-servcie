@@ -71,6 +71,13 @@ public class UserController {
         return Result.success(SUCCESS_RESET_PASSWORD);
     }
 
+    @PreAuthorize("hasAuthority('USER')")
+    @PutMapping("/reset/nickname")
+    public Result<Void> resetNickname(@RequestParam String nickname) {
+        userService.resetNickname(nickname);
+        return Result.success(SUCCESS_RESET_NICKNAME);
+    }
+
     @PostMapping("/code/phone")
     public Result<Void> sendPhoneCode(@RequestParam String phone) {
         userService.sendPhoneCode(phone);
@@ -87,6 +94,12 @@ public class UserController {
     public Result<Void> register(@RequestBody UserRegisterDTO userRegisterDTO) {
         userService.register(userRegisterDTO);
         return Result.success(SUCCESS_REGISTER);
+    }
+
+    @GetMapping("/register/username")
+    public Result<Void> checkUsername(@RequestParam String username) {
+        userService.checkUsername(username);
+        return Result.success(USERNAME_NOT_USED);
     }
     
 

@@ -27,6 +27,10 @@ import com.ai.user.utils.RedisIdWorker;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,6 +51,10 @@ import static com.ai.common.enums.StatusCode.*;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService {
 
+    @Autowired
+    @Lazy
+    private UserService self;
+
     private final HmacBlindIndex hmacBlindIndex;
 
     private final AesGcmCrypto aesGcmCrypto;
@@ -54,6 +62,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private final KeyProvider keyProvider;
 
     private final StringRedisTemplate redisTemplate;
+
+    private final RedissonClient redissonClient;
 
     private final UserMapper userMapper;
     
@@ -135,13 +145,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.eq("u.status", UserStatus.ENABLE.getValue());
         wrapper.eq("u.deleted", LogicDeleted.NOT_DELETED.getValue());
-        wrapper.eq("uac.deleted", LogicDeleted.NOT_DELETED.getValue());
         UserLoginDTO loginInfo = null;
+
+        RBloomFilter<String> usernameBloomFilter = redissonClient.getBloomFilter(USERNAME_BLOOM_FILTER);
 
         if (LoginType.MOBILE_CODE.getType().equals(loginType)) {
             String phone = userLoginDTO.getUsername();
             String code = userLoginDTO.getPassword();
             if (Validators.isCnMobile(phone)) {
+                RBloomFilter<byte[]> phoneBloomFilter = redissonClient.getBloomFilter(MOBILE_BLOOM_FILTER);
+
+                byte[] phoneHash = hmacBlindIndex.compute(phone, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion()));
+                if (!phoneBloomFilter.contains(phoneHash)) {
+                    User user = self.register(UserRegisterDTO.builder().phone(phone).phoneCode(code).build());
+                    Set<String> roles = Set.of(RoleEnum.USER.getValue());
+
+                    usernameBloomFilter.add(user.getUsername());
+                    phoneBloomFilter.add(phoneHash);
+
+                    return UserLoginDTO.builder().id(user.getId()).username(user.getUsername()).roles(roles).build();
+                }
                 checkPhoneCode(phone, code, null);
             } else {
                 throw new UserException(INVALID_PHONE);
@@ -154,6 +177,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             String email = userLoginDTO.getUsername();
             String code = userLoginDTO.getPassword();
             if (Validators.isEmail(email)) {
+                RBloomFilter<byte[]> emailBloomFilter = redissonClient.getBloomFilter(EMAIL_BLOOM_FILTER);
+
+                byte[] emailHash = hmacBlindIndex.compute(email, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion()));
+                if (!emailBloomFilter.contains(emailHash)) {
+                    User user = self.register(UserRegisterDTO.builder().email(email).emailCode(code).build());
+                    Set<String> roles = Set.of(RoleEnum.USER.getValue());
+
+                    usernameBloomFilter.add(user.getUsername());
+                    emailBloomFilter.add(emailHash);
+
+                    return UserLoginDTO.builder().id(user.getId()).username(user.getUsername()).roles(roles).build();
+                }
+
                 checkEmailCode(email, code, null);
             } else {
                 throw new UserException(INVALID_EMAIL);
@@ -425,6 +461,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
+    public void resetNickname(String nickname) {
+        if (StrUtil.isBlank(nickname)) {
+            throw new UserException(NULL_NICKNAME);
+        } else if (nickname.length() > 32) {
+            throw new UserException(TO_LONG_NICKNAME);
+        }
+        Long userId = UserContext.getUserId();
+        lambdaUpdate()
+                .eq(User::getId, userId)
+                .set(User::getNickname, nickname)
+                .eq(User::getDeleted, LogicDeleted.NOT_DELETED.getValue())
+                .update();
+    }
+
+    @Override
     public void sendPhoneCode(String phone) {
         Long userId = UserContext.getUserId();
 
@@ -468,25 +519,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     @Transactional
-    public void register(UserRegisterDTO userRegisterDTO) {
+    public User register(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername();
         String phone = userRegisterDTO.getPhone();
         String email = userRegisterDTO.getEmail();
 
         if (StrUtil.isNotBlank(username) && StrUtil.isNotBlank(phone)) {
-            createUserByUsernameAndPhone(userRegisterDTO);
+            return createUserByUsernameAndPhone(userRegisterDTO);
         } else if (StrUtil.isNotBlank(username) && StrUtil.isNotBlank(email)) {
-            createUserByUsernameAndEmail(userRegisterDTO);
+            return createUserByUsernameAndEmail(userRegisterDTO);
         } else if (StrUtil.isBlank(username) && StrUtil.isNotBlank(phone)) {
-            createUserByPhone(userRegisterDTO);
+            return createUserByPhone(userRegisterDTO);
         } else if (StrUtil.isBlank(username) && StrUtil.isNotBlank(email)) {
-            createUserByEmail(userRegisterDTO);
+            return createUserByEmail(userRegisterDTO);
         }  else {
             throw new UserException(INVALID_REGISTER_INFO);
         }
     }
 
-    private void createUserByUsernameAndPhone(UserRegisterDTO userRegisterDTO) {
+    private User createUserByUsernameAndPhone(UserRegisterDTO userRegisterDTO) {
         String phone = userRegisterDTO.getPhone();
         String username = userRegisterDTO.getUsername();
         String password = userRegisterDTO.getPassword();
@@ -520,9 +571,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         insertUserPhone(phone, user.getId(), now);
 
         insertUserRole(user);
+
+        return user;
     }
 
-    private void createUserByUsernameAndEmail(UserRegisterDTO userRegisterDTO) {
+    private User createUserByUsernameAndEmail(UserRegisterDTO userRegisterDTO) {
         String email = userRegisterDTO.getEmail();
         String username = userRegisterDTO.getUsername();
         String password = userRegisterDTO.getPassword();
@@ -556,9 +609,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         insertUserEmail(email, user.getId(), now);
 
         insertUserRole(user);
+
+        return user;
     }
 
-    private void createUserByPhone(UserRegisterDTO userRegisterDTO) {
+    private User createUserByPhone(UserRegisterDTO userRegisterDTO) {
         String phone = userRegisterDTO.getPhone();
         if (!Validators.isCnMobile(phone)) {
             throw new UserException(INVALID_PHONE);
@@ -575,9 +630,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         insertUserPhone(phone, user.getId(), now);
 
         insertUserRole(user);
+
+        return user;
     }
 
-    private void createUserByEmail(UserRegisterDTO userRegisterDTO) {
+    private User createUserByEmail(UserRegisterDTO userRegisterDTO) {
         String email = userRegisterDTO.getEmail();
         if (!Validators.isEmail(email)) {
             throw new UserException(INVALID_EMAIL);
@@ -594,13 +651,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         insertUserEmail(email, user.getId(), now);
 
         insertUserRole(user);
+
+        return user;
     }
 
     private User insertUser(String username, long userno, LocalDateTime now) {
         User user = User.builder()
                 .userNo(userno)
                 .username(username)
-                .nickName("nick-" + RandomUtil.randomNumbers(10))
+                .nickname("nick-" + RandomUtil.randomNumbers(10))
                 .avatar(null)
                 .gender(GenderEnum.NON_SETTING.getValue())
                 .createTime(now)
@@ -678,7 +737,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private void insertUserRole(User user) {
         UserRole userRole = UserRole.builder()
                 .userId(user.getId())
-                .roleId(RoleEnum.USER.getValue())
+                .roleId(RoleEnum.USER.getCode())
                 .build();
         try {
             userRoleMapper.insert(userRole);
@@ -689,6 +748,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     private String defaultUsername(long userno) {
         return "user" + userno;
+    }
+
+    @Override
+    public void checkUsername(String username) {
+        RBloomFilter<String> usernameBloomFilter = redissonClient.getBloomFilter(USERNAME_BLOOM_FILTER);
+        if (usernameBloomFilter.contains(username)) {
+            throw new UserException(USERNAME_EXISTED);
+        }
     }
 }
 

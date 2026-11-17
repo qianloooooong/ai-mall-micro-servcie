@@ -8,7 +8,7 @@
             <id property="id" column="id" />
             <result property="userNo" column="user_no" />
             <result property="username" column="username" />
-            <result property="nickName" column="nick_name" />
+            <result property="nickname" column="nick_name" />
             <result property="avatar" column="avatar" />
             <result property="gender" column="gender" />
             <result property="createTime" column="create_time" />

@@ -3,7 +3,7 @@ create table `user` (
     id bigint primary key comment '主键ID',
     user_no bigint not null unique comment '用户唯一编号',
     username varchar(64) not null comment '用户名',
-    nick_name varchar(64) not null comment '昵称',
+    nickname varchar(64) not null comment '昵称',
     avatar varchar(255) comment '头像',
     gender tinyint not null default 0 comment '性别：0-未设置，1-男，2-女',
     create_time datetime not null comment '创建时间',

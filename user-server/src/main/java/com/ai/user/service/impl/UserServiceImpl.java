@@ -158,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 byte[] phoneHash = hmacBlindIndex.compute(phone, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion()));
                 if (!phoneBloomFilter.contains(phoneHash)) {
                     User user = self.register(UserRegisterDTO.builder().phone(phone).phoneCode(code).build());
-                    Set<String> roles = Set.of(RoleEnum.USER.getValue());
+                    Set<String> roles = Set.of(Roles.USER.getValue());
 
                     usernameBloomFilter.add(user.getUsername());
                     phoneBloomFilter.add(phoneHash);
@@ -182,7 +182,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 byte[] emailHash = hmacBlindIndex.compute(email, keyProvider.getHmacKey(keyProvider.hmacCurrentVersion()));
                 if (!emailBloomFilter.contains(emailHash)) {
                     User user = self.register(UserRegisterDTO.builder().email(email).emailCode(code).build());
-                    Set<String> roles = Set.of(RoleEnum.USER.getValue());
+                    Set<String> roles = Set.of(Roles.USER.getValue());
 
                     usernameBloomFilter.add(user.getUsername());
                     emailBloomFilter.add(emailHash);
@@ -661,7 +661,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 .username(username)
                 .nickname("nick-" + RandomUtil.randomNumbers(10))
                 .avatar(null)
-                .gender(GenderEnum.NON_SETTING.getValue())
+                .gender(Genders.NON_SETTING.getValue())
                 .createTime(now)
                 .updateTime(now)
                 .status(UserStatus.ENABLE.getValue())
@@ -737,7 +737,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private void insertUserRole(User user) {
         UserRole userRole = UserRole.builder()
                 .userId(user.getId())
-                .roleId(RoleEnum.USER.getCode())
+                .roleId(Roles.USER.getCode())
                 .build();
         try {
             userRoleMapper.insert(userRole);

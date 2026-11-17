@@ -3,7 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 **/target/
 **/test/
-application-dev.yml
+application-dev.yaml
 logs/
 aimall.jks
 test-login-vue/

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum GenderEnum {
+public enum Genders {
     NON_SETTING(0, "未设置"),
     MALE(1, "男"),
     FEMALE(2, "女");

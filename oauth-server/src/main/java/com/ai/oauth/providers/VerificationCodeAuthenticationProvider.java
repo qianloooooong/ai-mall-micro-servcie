@@ -27,10 +27,11 @@ public class VerificationCodeAuthenticationProvider implements AuthenticationPro
             return null;
         }
 
-        UserLoginDTO dto = new UserLoginDTO();
-        dto.setUsername(authentication.getName());
-        dto.setPassword(authentication.getCredentials().toString());
-        dto.setLoginType(details.getLoginType());
+        UserLoginDTO dto = UserLoginDTO.builder()
+                .username(authentication.getName())
+                .password(authentication.getCredentials().toString())
+                .loginType(details.getLoginType())
+                .build();
 
         Result<UserLoginDTO> result = userClient.loginByCode(dto);
         UserLoginDTO info = result.getData();

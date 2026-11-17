@@ -15,13 +15,13 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
             @Override
             public Result<UserLoginDTO> getUserLoginInfo(UserLoginDTO userLoginDTO) {
                 log.error("远程调用UserClient#getUserLoginInfo失败, args: {}, cause: {}", userLoginDTO, cause.getMessage());
-                return Result.success(StatusCode.SUCCESS, new UserLoginDTO());
+                return Result.success(StatusCode.SUCCESS, UserLoginDTO.builder().build());
             }
 
             @Override
             public Result<UserLoginDTO> loginByCode(UserLoginDTO userLoginDTO) {
                 log.error("远程调用UserClient#loginByCode失败, args: {}, cause: {}", userLoginDTO, cause.getMessage());
-                return Result.success(StatusCode.SUCCESS, new UserLoginDTO());
+                return Result.success(StatusCode.SUCCESS, UserLoginDTO.builder().build());
             }
         };
     }

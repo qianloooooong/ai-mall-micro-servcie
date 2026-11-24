@@ -12,6 +12,6 @@ public class UserException extends WarmException {
     }
 
     public UserException(StatusCode sc, String detail, Throwable cause) {
-        super(sc, detail);
+        super(sc, detail, cause);
     }
 }

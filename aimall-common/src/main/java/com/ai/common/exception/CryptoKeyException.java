@@ -12,6 +12,6 @@ public class CryptoKeyException extends ErrorException {
     }
 
     public CryptoKeyException(StatusCode sc, String detail, Throwable cause) {
-        super(sc, detail);
+        super(sc, detail, cause);
     }
 }
